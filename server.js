@@ -4,7 +4,7 @@ const path = require("node:path");
 
 const port = Number(process.env.PORT || 8080);
 const root = __dirname;
-const sheetCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbvGbdDL3Mn9M5YGGvvB9ZuFrA-naqeTDfOUJxFWxblSy6UkZaCoig13As4ufsfmJcrEQ5nVUwandr/pub?output=csv";
+const sheetCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbvGbdDL3Mn9M5YGGvvB9ZuFrA-naqeTDfOUJxFWxblSy6UkZaCoig13As4ufsfmJcrEQ5nVUwandr/pub";
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -20,8 +20,17 @@ function send(response, status, body, headers = {}) {
   response.end(body);
 }
 
-async function serveSheet(response) {
+async function serveSheet(request, response) {
+  const requestUrl = new URL(request.url, `http://${request.headers.host}`);
   const liveUrl = new URL(sheetCsvUrl);
+  const gid = requestUrl.searchParams.get("gid");
+
+  if (gid) {
+    liveUrl.searchParams.set("gid", gid);
+    liveUrl.searchParams.set("single", "true");
+  }
+
+  liveUrl.searchParams.set("output", "csv");
   liveUrl.searchParams.set("cacheBust", Date.now());
 
   const sheetResponse = await fetch(liveUrl, { cache: "no-store" });
@@ -53,7 +62,7 @@ async function serveStatic(request, response) {
 
 const server = http.createServer((request, response) => {
   if (request.url.startsWith("/api/sheet")) {
-    serveSheet(response).catch((error) => {
+    serveSheet(request, response).catch((error) => {
       console.error(error);
       send(response, 502, "Could not load spreadsheet", { "Content-Type": "text/plain; charset=utf-8" });
     });

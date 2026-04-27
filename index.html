@@ -124,6 +124,12 @@
         box-shadow: var(--shadow);
       }
 
+      .groups {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
       .board-header {
         display: flex;
         gap: 12px;
@@ -140,9 +146,13 @@
         font-size: 1.2rem;
       }
 
-      .updated {
-        color: rgba(255, 255, 255, 0.86);
-        font-size: 0.85rem;
+      .group-prize {
+        display: block;
+        margin-top: 8px;
+        color: white;
+        font-size: 1.45rem;
+        font-weight: 700;
+        line-height: 1;
       }
 
       .table-wrap {
@@ -151,7 +161,7 @@
 
       table {
         width: 100%;
-        min-width: 620px;
+        min-width: 0;
         border-collapse: collapse;
       }
 
@@ -187,6 +197,14 @@
         min-width: 190px;
       }
 
+      .team-name {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 88px;
+        gap: 8px;
+        align-items: center;
+        width: 100%;
+      }
+
       .flag {
         width: 42px;
         height: 28px;
@@ -215,6 +233,15 @@
       .pill.no {
         color: #7b2d25;
         background: rgba(179, 67, 56, 0.14);
+      }
+
+      .team-status {
+        justify-content: center;
+        min-height: 24px;
+        min-width: 88px;
+        padding: 0 8px;
+        font-size: 0.72rem;
+        white-space: nowrap;
       }
 
       .empty {
@@ -254,6 +281,10 @@
           grid-column: 1 / -1;
         }
 
+        .groups {
+          grid-template-columns: 1fr;
+        }
+
         .stat {
           min-height: 96px;
           padding: 14px;
@@ -267,10 +298,6 @@
           display: block;
         }
 
-        .updated {
-          display: block;
-          margin-top: 8px;
-        }
       }
 
       @media (max-width: 640px) {
@@ -343,9 +370,8 @@
           font-size: 1rem;
         }
 
-        .updated {
-          font-size: 0.78rem;
-          line-height: 1.35;
+        .group-prize {
+          font-size: 1.2rem;
         }
 
         .table-wrap {
@@ -445,7 +471,7 @@
     <main class="page">
       <header class="masthead">
         <div class="hero-copy">
-          <p class="eyebrow">Group 1</p>
+          <p class="eyebrow">Group 1 &amp; Group 2</p>
           <h1>Astute World Cup Sweepstake</h1>
         </div>
         <div class="brand-line">
@@ -471,42 +497,91 @@
           <strong id="active-count">-</strong>
         </article>
         <article class="stat">
-          <span>Prize pot</span>
+          <span>Combined pots</span>
           <strong id="prize-pot">-</strong>
         </article>
       </section>
 
-      <section class="board" aria-labelledby="table-title">
-        <div class="board-header">
-          <h2 id="table-title">Sweepstake entries</h2>
-          <span class="updated" id="updated">Loading spreadsheet...</span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Team</th>
-                <th>Paid?</th>
-                <th>Eliminated?</th>
-              </tr>
-            </thead>
-            <tbody id="entries">
-              <tr>
-                <td class="empty" colspan="4">Loading entries...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <div class="groups">
+        <section class="board" aria-labelledby="group-1-title">
+          <div class="board-header">
+            <div>
+              <h2 id="group-1-title">Group 1</h2>
+              <span class="group-prize" id="prize-group-1">Prize pot -</span>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Team</th>
+                  <th>Paid?</th>
+                </tr>
+              </thead>
+              <tbody id="entries-group-1">
+                <tr>
+                  <td class="empty" colspan="3">Loading entries...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="board" aria-labelledby="group-2-title">
+          <div class="board-header">
+            <div>
+              <h2 id="group-2-title">Group 2</h2>
+              <span class="group-prize" id="prize-group-2">Prize pot -</span>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Team</th>
+                  <th>Paid?</th>
+                </tr>
+              </thead>
+              <tbody id="entries-group-2">
+                <tr>
+                  <td class="empty" colspan="3">Loading entries...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
       <p class="notice" id="notice"></p>
     </main>
 
     <script>
-      const sheetCsvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbvGbdDL3Mn9M5YGGvvB9ZuFrA-naqeTDfOUJxFWxblSy6UkZaCoig13As4ufsfmJcrEQ5nVUwandr/pub?output=csv";
-      const csvUrl = window.location.protocol === "file:" ? sheetCsvUrl : "/api/sheet";
-      const fallbackCsv = `First Name,Last initial,Team,Country Flag Code,Paid?,Eliminated?,,,Buy in Amount,£10.00
-Jaidon,W,England,EN,TRUE,TRUE,,,Total Prize Pot,`;
+      const sheetBaseUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRbvGbdDL3Mn9M5YGGvvB9ZuFrA-naqeTDfOUJxFWxblSy6UkZaCoig13As4ufsfmJcrEQ5nVUwandr/pub";
+      const sheetTabs = {
+        group1: { title: "Group 1", gid: "0", entriesId: "entries-group-1", prizeId: "prize-group-1" },
+        group2: { title: "Group 2", gid: "841055588", entriesId: "entries-group-2", prizeId: "prize-group-2" },
+        allTeams: { title: "All Teams", gid: "1603349445" },
+        teams: { title: "Teams Flag Codes", gid: "1437858886" }
+      };
+      const fallbackData = {
+        group1: `First Name,Last initial,Team,Paid?,,,Buy in Amount,£10.00
+TEST,1,England,TRUE,,,Total Prize Pot,£30.00
+TEST,2,France,TRUE,,,,
+TEST,3,Canada,TRUE,,,,`,
+        group2: `First Name,Last initial,Team,Paid?,,,Buy in Amount,£10.00
+TEST,1,England,TRUE,,,Total Prize Pot,£30.00
+TEST,2,France,TRUE,,,,
+TEST,3,Canada,TRUE,,,,`,
+        allTeams: `Confederation,Country,Eliminated?
+Host,Canada,FALSE
+UEFA,England,FALSE
+UEFA,France,FALSE`,
+        teams: `Confederation,Country,FIFA Code,ISO Code,Eliminated?
+Host,Canada,CAN,CA,FALSE
+UEFA,England,ENG,GB,FALSE
+UEFA,France,FRA,FR,FALSE`
+      };
       let hasLoadedLiveData = false;
 
       const flagImages = {
@@ -580,22 +655,104 @@ Jaidon,W,England,EN,TRUE,TRUE,,,Total Prize Pot,`;
         return ["true", "yes", "y", "paid", "1"].includes(String(value).trim().toLowerCase());
       }
 
-      function render(csvText, source = "live") {
-        const fromFallback = source === "fallback";
+      function getSheetUrl(gid) {
+        const url = window.location.protocol === "file:"
+          ? new URL(sheetBaseUrl)
+          : new URL("/api/sheet", window.location.href);
+
+        url.searchParams.set("gid", gid);
+        url.searchParams.set("single", "true");
+        url.searchParams.set("output", "csv");
+        url.searchParams.set("cacheBust", Date.now());
+        return url.toString();
+      }
+
+      function normaliseHeader(value) {
+        return String(value).trim().toLowerCase();
+      }
+
+      function cell(row, indexes, name) {
+        const index = indexes.get(normaliseHeader(name));
+        return index === undefined ? "" : (row[index] || "").trim();
+      }
+
+      function normaliseTeamName(value) {
+        return String(value).trim().toLowerCase();
+      }
+
+      function cleanFlagCode(value) {
+        return String(value).trim().toUpperCase().replace(/[^A-Z]/g, "");
+      }
+
+      function parseTeamMetadata(flagCsvText, eliminationCsvText) {
+        const eliminationRows = parseCsv(eliminationCsvText);
+        const eliminationHeaders = eliminationRows[0] || [];
+        const eliminationIndexes = new Map(eliminationHeaders.map((header, index) => [normaliseHeader(header), index]));
+        const eliminations = new Map(eliminationRows.slice(1).map((row) => {
+          const country = cell(row, eliminationIndexes, "Country");
+          if (!country) return null;
+          return [normaliseTeamName(country), truthy(cell(row, eliminationIndexes, "Eliminated?"))];
+        }).filter(Boolean));
+
+        const rows = parseCsv(flagCsvText);
+        const headers = rows[0] || [];
+        const indexes = new Map(headers.map((header, index) => [normaliseHeader(header), index]));
+
+        return new Map(rows.slice(1).map((row) => {
+          const country = cell(row, indexes, "Country");
+          if (!country) return null;
+
+          return [normaliseTeamName(country), {
+            country,
+            fifaCode: cleanFlagCode(cell(row, indexes, "FIFA Code")),
+            isoCode: cleanFlagCode(cell(row, indexes, "ISO Code")),
+            eliminated: eliminations.get(normaliseTeamName(country)) || false
+          }];
+        }).filter(Boolean));
+      }
+
+      function parseGroup(csvText, teamMetadata) {
         const rows = parseCsv(csvText);
         const headers = rows[0] || [];
-        const dataRows = rows.slice(1).filter((row) => row[0] || row[1] || row[2]);
-        const entries = dataRows.map((row) => ({
-          firstName: row[0] || "",
-          lastInitial: row[1] || "",
-          team: row[2] || "",
-          flagCode: (row[3] || "").trim().toUpperCase(),
-          paid: truthy(row[4]),
-          eliminated: truthy(row[5])
-        })).sort((a, b) => Number(a.eliminated) - Number(b.eliminated));
+        const indexes = new Map(headers.map((header, index) => [normaliseHeader(header), index]));
+        const entries = rows.slice(1).filter((row) => {
+          return cell(row, indexes, "First Name") || cell(row, indexes, "Last initial") || cell(row, indexes, "Team");
+        }).map((row) => {
+          const team = cell(row, indexes, "Team");
+          const metadata = teamMetadata.get(normaliseTeamName(team)) || {};
 
-        const buyIn = findSummary(rows, "Buy in Amount") || headers[9] || "";
-        const prizePot = findSummary(rows, "Total Prize Pot") || formatMoney(moneyToNumber(buyIn) * entries.length);
+          return {
+            firstName: cell(row, indexes, "First Name"),
+            lastInitial: cell(row, indexes, "Last initial"),
+            team,
+            paid: truthy(cell(row, indexes, "Paid?")),
+            fifaCode: metadata.fifaCode || "",
+            isoCode: metadata.isoCode || "",
+            eliminated: Boolean(metadata.eliminated)
+          };
+        });
+
+        return {
+          entries,
+          buyIn: findSummary(rows, "Buy in Amount") || headers[7] || "",
+          prizePot: findSummary(rows, "Total Prize Pot") || ""
+        };
+      }
+
+      function render(data, source = "live") {
+        const fromFallback = source === "fallback";
+        const teamMetadata = parseTeamMetadata(data.teams, data.allTeams);
+        const groups = [
+          { key: "group1", ...sheetTabs.group1, ...parseGroup(data.group1, teamMetadata) },
+          { key: "group2", ...sheetTabs.group2, ...parseGroup(data.group2, teamMetadata) }
+        ].map((group) => {
+          const calculatedPrizePot = moneyToNumber(group.buyIn) * group.entries.length;
+          const prizePot = group.prizePot || (calculatedPrizePot > 0 ? formatMoney(calculatedPrizePot) : "");
+          return { ...group, prizePot };
+        });
+        const entries = groups.flatMap((group) => group.entries);
+        const buyIn = groups.find((group) => group.buyIn)?.buyIn || "";
+        const combinedPrizePot = groups.map((group) => moneyToNumber(group.prizePot)).reduce((total, amount) => total + amount, 0);
         const paidCount = entries.filter((entry) => entry.paid).length;
         const activeCount = entries.filter((entry) => !entry.eliminated).length;
 
@@ -603,35 +760,43 @@ Jaidon,W,England,EN,TRUE,TRUE,,,Total Prize Pot,`;
         document.getElementById("paid-count").textContent = paidCount;
         document.getElementById("active-count").textContent = activeCount;
         document.getElementById("buy-in").textContent = buyIn || "-";
-        document.getElementById("prize-pot").textContent = prizePot || "-";
-        const checkedAt = new Date().toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
-        document.getElementById("updated").textContent = fromFallback
-          ? `Fallback copy loaded ${checkedAt}`
-          : `Live sheet checked ${checkedAt}`;
+        document.getElementById("prize-pot").textContent = combinedPrizePot > 0 ? formatMoney(combinedPrizePot) : "-";
+        groups.forEach((group) => {
+          document.getElementById(group.prizeId).textContent = `Prize pot ${group.prizePot || "-"}`;
+        });
         document.getElementById("notice").textContent = fromFallback
           ? "Showing the saved copy because the live spreadsheet could not be reached."
           : "Reading from the live published spreadsheet.";
 
-        const tbody = document.getElementById("entries");
-        if (entries.length === 0) {
-          tbody.innerHTML = `<tr><td class="empty" colspan="4">No entries found in the spreadsheet.</td></tr>`;
+        groups.forEach((group) => renderGroup(group));
+      }
+
+      function renderGroup(group) {
+        const tbody = document.getElementById(group.entriesId);
+        if (group.entries.length === 0) {
+          tbody.innerHTML = `<tr><td class="empty" colspan="3">No entries found in the spreadsheet.</td></tr>`;
           return;
         }
 
-        tbody.innerHTML = entries.map((entry) => {
+        tbody.innerHTML = group.entries.map((entry) => {
           const displayName = [entry.firstName, entry.lastInitial].filter(Boolean).join(" ");
-          const flagSrc = flagImages[entry.flagCode] || `https://flagcdn.com/w80/${entry.flagCode.toLowerCase()}.png`;
+          const flagSrc = flagImages[entry.fifaCode] || flagImages[entry.isoCode] || `https://flagcdn.com/w80/${entry.isoCode.toLowerCase()}.png`;
+          const flag = entry.fifaCode || entry.isoCode
+            ? `<img class="flag" src="${flagSrc}" alt="" loading="lazy" onerror="this.style.display='none'">`
+            : "";
           return `
             <tr>
               <td class="entrant" data-label="Name">${escapeHtml(displayName)}</td>
               <td data-label="Team">
                 <div class="team-cell">
-                  <img class="flag" src="${flagSrc}" alt="" loading="lazy" onerror="this.style.display='none'">
-                  <span>${escapeHtml(entry.team)}</span>
+                  ${flag}
+                  <span class="team-name">
+                    <span>${escapeHtml(entry.team)}</span>
+                    <span class="pill team-status ${entry.eliminated ? "no" : "yes"}">${entry.eliminated ? "Eliminated" : "Still in"}</span>
+                  </span>
                 </div>
               </td>
               <td data-label="Paid?"><span class="pill ${entry.paid ? "yes" : "no"}">${entry.paid ? "Paid" : "Not paid"}</span></td>
-              <td data-label="Eliminated?"><span class="pill ${entry.eliminated ? "no" : "yes"}">${entry.eliminated ? "Eliminated" : "Still in"}</span></td>
             </tr>
           `;
         }).join("");
@@ -648,26 +813,25 @@ Jaidon,W,England,EN,TRUE,TRUE,,,Total Prize Pot,`;
       }
 
       function loadSpreadsheet() {
-        const liveUrl = new URL(csvUrl, window.location.href);
-        liveUrl.searchParams.set("cacheBust", Date.now());
-
-        fetch(liveUrl.toString(), { cache: "reload" })
-          .then((response) => {
-            if (!response.ok) throw new Error(`Spreadsheet returned ${response.status}`);
-            return response.text();
-          })
-          .then((text) => {
+        Promise.all(Object.entries(sheetTabs).map(([key, tab]) => (
+          fetch(getSheetUrl(tab.gid), { cache: "reload" })
+            .then((response) => {
+              if (!response.ok) throw new Error(`${tab.title} returned ${response.status}`);
+              return response.text();
+            })
+            .then((text) => [key, text])
+        )))
+          .then((sheets) => {
             hasLoadedLiveData = true;
-            render(text, "live");
+            render(Object.fromEntries(sheets), "live");
           })
           .catch((error) => {
             console.warn("Could not load live spreadsheet", error);
             if (!hasLoadedLiveData) {
-              render(fallbackCsv, "fallback");
+              render(fallbackData, "fallback");
               return;
             }
 
-            document.getElementById("updated").textContent = `Live refresh failed ${new Date().toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}`;
             document.getElementById("notice").textContent = "Could not reach the live spreadsheet on this refresh, so the last loaded live values are still shown.";
           });
       }
