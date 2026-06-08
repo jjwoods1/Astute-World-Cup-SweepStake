@@ -1,0 +1,78 @@
+{
+  "name": "World Cup Sweepstake — Write (assign team)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wc-sweepstake-write",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b2f00002-0000-4000-8000-000000000001",
+      "name": "Webhook (write)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "wc-sweepstake-write",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1TZC-fFB-an8Jf1mvMIH4Tc9ppD6tqEXk4crWv1Jy31M",
+          "mode": "list",
+          "cachedResultName": "Astute World Cup Sweepstake"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json.body.sheetGid }}",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": ["row_number"],
+          "value": {
+            "row_number": "={{ $json.body.person.rowNumber }}",
+            "Team": "={{ $json.body.update.value }}"
+          },
+          "schema": [
+            { "id": "row_number", "displayName": "row_number", "type": "number", "display": true, "removed": false, "readOnly": true, "required": false, "defaultMatch": false, "canBeUsedToMatch": true },
+            { "id": "Team", "displayName": "Team", "type": "string", "display": true, "removed": false, "readOnly": false, "required": false, "defaultMatch": false, "canBeUsedToMatch": true }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b2f00002-0000-4000-8000-000000000002",
+      "name": "Update Team Cell",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [260, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "fbjo8wjmhy3kj1DR", "name": "Google Sheets account" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true, \"row\": $json.row_number, \"team\": $json.Team } }}",
+        "options": {}
+      },
+      "id": "b2f00002-0000-4000-8000-000000000003",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [520, 300]
+    }
+  ],
+  "connections": {
+    "Webhook (write)": { "main": [[{ "node": "Update Team Cell", "type": "main", "index": 0 }]] },
+    "Update Team Cell": { "main": [[{ "node": "Respond", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

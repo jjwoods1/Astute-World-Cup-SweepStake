@@ -1,0 +1,189 @@
+{
+  "name": "World Cup Sweepstake — Read (live)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "wc-sweepstake-read",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d6428bc5-4936-4709-ba9e-ee5e38a421ec",
+      "name": "Webhook (read)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-192, 16],
+      "webhookId": "wc-sweepstake-read",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1TZC-fFB-an8Jf1mvMIH4Tc9ppD6tqEXk4crWv1Jy31M",
+          "mode": "list",
+          "cachedResultName": "Astute World Cup Sweepstake"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "0",
+          "mode": "list",
+          "cachedResultName": "Group 1"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": { "rangeDefinition": "specifyRangeA1", "range": "A1:H49" }
+          }
+        }
+      },
+      "id": "2ba2550e-3765-4c5c-9cbb-750a39bfc102",
+      "name": "Read Group 1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [48, 16],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "fbjo8wjmhy3kj1DR", "name": "Google Sheets account" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1TZC-fFB-an8Jf1mvMIH4Tc9ppD6tqEXk4crWv1Jy31M",
+          "mode": "list",
+          "cachedResultName": "Astute World Cup Sweepstake"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "841055588",
+          "mode": "list",
+          "cachedResultName": "Group 2"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": { "rangeDefinition": "specifyRangeA1", "range": "A1:H49" }
+          }
+        }
+      },
+      "id": "b2abc457-d308-48fe-911a-efd090f26973",
+      "name": "Read Group 2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [288, 16],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "fbjo8wjmhy3kj1DR", "name": "Google Sheets account" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1TZC-fFB-an8Jf1mvMIH4Tc9ppD6tqEXk4crWv1Jy31M",
+          "mode": "list",
+          "cachedResultName": "Astute World Cup Sweepstake"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "1603349445",
+          "mode": "list",
+          "cachedResultName": "All Teams"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": { "rangeDefinition": "specifyRangeA1", "range": "A1:H49" }
+          }
+        }
+      },
+      "id": "abb4d213-3f13-48c3-bb81-e47e1ea950e0",
+      "name": "Read All Teams",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [528, 16],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "fbjo8wjmhy3kj1DR", "name": "Google Sheets account" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1TZC-fFB-an8Jf1mvMIH4Tc9ppD6tqEXk4crWv1Jy31M",
+          "mode": "list",
+          "cachedResultName": "Astute World Cup Sweepstake"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "1437858886",
+          "mode": "list",
+          "cachedResultName": "Teams Flag Codes"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": { "rangeDefinition": "specifyRangeA1", "range": "A1:H49" }
+          }
+        }
+      },
+      "id": "623277d0-8aa1-40d2-b4c1-27f9df11f4a5",
+      "name": "Read Team Codes",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [768, 16],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "fbjo8wjmhy3kj1DR", "name": "Google Sheets account" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Bundle the four live tabs into one raw response.\n// The draw page does its own filtering/animation from this data,\n// so we keep this node \"dumb\" — just pass the rows through.\n// `row_number` (added automatically by the Google Sheets node) is\n// preserved so the write workflow can target the exact row.\nconst rows = (name) => $(name).all().map((item) => item.json);\n\nreturn [\n  {\n    json: {\n      group1: rows('Read Group 1'),\n      group2: rows('Read Group 2'),\n      allTeams: rows('Read All Teams'),\n      teamCodes: rows('Read Team Codes')\n    }\n  }\n];"
+      },
+      "id": "b7d3ce01-b879-4a26-a768-8f8661d6281d",
+      "name": "Build Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1008, 16]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "f38518a7-12c4-444e-8f2f-d10b94258615",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1248, 16]
+    }
+  ],
+  "connections": {
+    "Webhook (read)": { "main": [[{ "node": "Read Group 1", "type": "main", "index": 0 }]] },
+    "Read Group 1": { "main": [[{ "node": "Read Group 2", "type": "main", "index": 0 }]] },
+    "Read Group 2": { "main": [[{ "node": "Read All Teams", "type": "main", "index": 0 }]] },
+    "Read All Teams": { "main": [[{ "node": "Read Team Codes", "type": "main", "index": 0 }]] },
+    "Read Team Codes": { "main": [[{ "node": "Build Response", "type": "main", "index": 0 }]] },
+    "Build Response": { "main": [[{ "node": "Respond", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

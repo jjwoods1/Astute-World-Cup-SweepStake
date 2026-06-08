@@ -57,8 +57,28 @@
 
       .brand-line {
         display: flex;
+        gap: 16px;
         justify-content: flex-end;
         align-items: center;
+      }
+
+      .nav-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 42px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.9);
+        font-size: 0.84rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .nav-link:hover {
+        border-color: var(--astute-blue);
+        color: var(--astute-blue);
       }
 
       .astute-logo {
@@ -322,12 +342,18 @@
 
         .brand-line {
           width: 100%;
-          justify-content: flex-start;
+          justify-content: space-between;
         }
 
         .astute-logo {
           width: 218px;
           height: 92px;
+        }
+
+        .nav-link {
+          min-height: 38px;
+          padding: 0 10px;
+          font-size: 0.76rem;
         }
 
         .eyebrow {
@@ -475,6 +501,7 @@
           <h1>Astute World Cup Sweepstake</h1>
         </div>
         <div class="brand-line">
+          <a class="nav-link" href="assign.html">Assign teams</a>
           <img class="astute-logo" src="assets/astute-logo-tagline.png" alt="Astute">
         </div>
       </header>
