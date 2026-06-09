@@ -144,10 +144,7 @@
       }
 
       .layout {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 340px;
-        gap: 18px;
-        align-items: start;
+        display: block;
       }
 
       .panel {
@@ -160,12 +157,18 @@
 
       .toolbar {
         display: grid;
-        grid-template-columns: minmax(160px, 1fr) auto auto;
-        gap: 12px;
-        align-items: center;
-        padding: 16px;
+        grid-template-columns: minmax(200px, 1fr) auto;
+        gap: 16px;
+        align-items: end;
+        padding: 20px 24px;
         border-bottom: 1px solid var(--line);
         background: var(--soft-blue);
+      }
+
+      .toolbar .button#draw-button {
+        min-height: 58px;
+        padding: 0 44px;
+        font-size: 1.25rem;
       }
 
       .field {
@@ -241,10 +244,10 @@
       .draw-stage {
         position: relative;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 96px minmax(0, 1fr);
-        gap: 16px;
+        grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr);
+        gap: 20px;
         align-items: stretch;
-        padding: 28px 24px;
+        padding: clamp(28px, 4vw, 56px) clamp(24px, 4vw, 56px);
         overflow: hidden;
         background:
           radial-gradient(130% 95% at 50% -20%, rgba(0, 145, 210, 0.16), transparent 60%),
@@ -253,8 +256,8 @@
 
       .ticket {
         position: relative;
-        min-height: 268px;
-        padding: 24px 22px;
+        min-height: clamp(300px, 34vh, 440px);
+        padding: 32px 28px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -280,35 +283,37 @@
       .ticket-title {
         margin: 0 0 16px;
         color: var(--astute-blue);
-        font-size: 0.74rem;
+        font-size: clamp(0.74rem, 1vw, 0.95rem);
         font-weight: 700;
         letter-spacing: 0.2em;
         text-transform: uppercase;
       }
 
       .ticket-value {
-        min-height: 96px;
+        min-height: clamp(96px, 12vh, 150px);
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0;
         font-weight: 700;
-        font-size: 3rem;
-        line-height: 1.05;
+        font-size: clamp(3rem, 5.5vw, 5.4rem);
+        line-height: 1.04;
         color: var(--ink);
-        overflow-wrap: break-word;
+        overflow-wrap: anywhere;
+        width: 100%;
       }
 
       .ticket-meta {
-        margin: 16px 0 0;
+        margin: 18px 0 0;
         color: var(--muted);
-        font-size: 0.95rem;
+        font-size: clamp(0.95rem, 1.3vw, 1.25rem);
         min-height: 1.2em;
       }
 
       .flag {
-        width: 152px;
-        height: 100px;
+        width: clamp(152px, 17vw, 240px);
+        height: auto;
+        aspect-ratio: 3 / 2;
         margin-bottom: 18px;
         border: 1px solid rgba(23, 20, 16, 0.18);
         border-radius: 8px;
@@ -318,15 +323,16 @@
       }
 
       .flag-slot {
-        height: 118px;
+        height: clamp(118px, 13vw, 180px);
         display: flex;
         align-items: center;
         justify-content: center;
       }
 
       .flag-placeholder {
-        width: 152px;
-        height: 100px;
+        width: clamp(152px, 17vw, 240px);
+        height: auto;
+        aspect-ratio: 3 / 2;
         margin-bottom: 18px;
         border: 1px dashed var(--line);
         border-radius: 8px;
@@ -375,81 +381,43 @@
       }
 
       .medallion {
-        width: 64px;
-        height: 64px;
+        width: 80px;
+        height: 80px;
         display: grid;
         place-items: center;
         border-radius: 50%;
         color: #ffffff;
-        font-size: 2rem;
+        font-size: 2.4rem;
         font-weight: 700;
         background: radial-gradient(circle at 35% 30%, var(--astute-blue-light), var(--astute-blue) 60%);
         box-shadow: 0 8px 22px rgba(0, 145, 210, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.5);
       }
 
-      .actions {
+      .statusbar {
         display: flex;
-        flex-wrap: wrap;
         align-items: center;
-        gap: 10px;
-        padding: 18px 20px 20px;
+        gap: 14px;
+        padding: 16px 24px 20px;
       }
 
-      .payload-toggle {
-        margin-left: auto;
-        border: none;
-        background: none;
-        color: var(--astute-blue);
-        font-size: 0.82rem;
-        font-weight: 700;
-        text-decoration: underline;
-        padding: 6px;
-      }
-
-      .side {
-        display: grid;
-        gap: 12px;
-      }
-
-      .metric-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-
-      .metric {
-        min-height: 96px;
-        padding: 16px;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.96);
-      }
-
-      .metric span {
-        display: block;
-        color: var(--muted);
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-      }
-
-      .metric strong {
-        display: block;
-        margin-top: 10px;
-        font-weight: 700;
-        font-size: 2.1rem;
-        line-height: 1;
-        color: var(--ink);
+      .retry-button {
+        flex: 0 0 auto;
       }
 
       .status {
-        min-height: 52px;
-        padding: 14px 16px;
+        flex: 1 1 auto;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 12px 18px;
         border: 1px solid var(--line);
         border-radius: 12px;
         color: var(--muted);
         background: white;
-        font-size: 0.9rem;
+        font-size: clamp(0.95rem, 1.4vw, 1.2rem);
+        font-weight: 600;
         line-height: 1.4;
       }
 
@@ -469,20 +437,6 @@
         color: #7b2d25;
         border-color: rgba(179, 67, 56, 0.3);
         background: rgba(179, 67, 56, 0.12);
-      }
-
-      pre {
-        max-height: 220px;
-        margin: 0;
-        padding: 14px;
-        overflow: auto;
-        border: 1px solid var(--line);
-        border-radius: 12px;
-        background: #f7fbfd;
-        color: var(--ink);
-        font-size: 0.78rem;
-        line-height: 1.45;
-        white-space: pre-wrap;
       }
 
       .hidden {
@@ -602,10 +556,6 @@
                 <option value="group2">Group 2</option>
               </select>
             </div>
-            <label class="toggle">
-              <input id="paid-only" type="checkbox">
-              <span>Paid only</span>
-            </label>
             <button class="button" id="draw-button" type="button">Draw</button>
           </div>
 
@@ -613,7 +563,7 @@
             <article class="ticket" id="ticket-name">
               <p class="ticket-title">Name</p>
               <p class="ticket-value" id="draw-name">Ready</p>
-              <p class="ticket-meta" id="draw-person-meta">Waiting for the sheet</p>
+              <p class="ticket-meta" id="draw-person-meta">Choose a group and draw</p>
             </article>
 
             <div class="joiner" aria-hidden="true">
@@ -627,39 +577,15 @@
                 <div class="flag-placeholder" id="flag-placeholder">?</div>
               </div>
               <p class="ticket-value" id="draw-team">Ready</p>
-              <p class="ticket-meta" id="draw-team-meta">Waiting for the sheet</p>
+              <p class="ticket-meta" id="draw-team-meta">Choose a group and draw</p>
             </article>
           </div>
 
-          <div class="actions">
-            <button class="button" id="send-button" type="button" disabled>Send to workflow</button>
-            <button class="button secondary" id="copy-button" type="button" disabled>Copy payload</button>
-            <button class="payload-toggle hidden" id="payload-toggle" type="button">Show payload</button>
+          <div class="statusbar">
+            <div class="status" id="status">Loading live spreadsheet...</div>
+            <button class="button secondary retry-button hidden" id="retry-button" type="button">Retry save</button>
           </div>
         </section>
-
-        <aside class="side" aria-label="Draw status">
-          <div class="metric-grid">
-            <article class="metric">
-              <span>Names left</span>
-              <strong id="names-left">-</strong>
-            </article>
-            <article class="metric">
-              <span>Teams left</span>
-              <strong id="teams-left">-</strong>
-            </article>
-            <article class="metric">
-              <span>Assigned</span>
-              <strong id="assigned-count">-</strong>
-            </article>
-            <article class="metric">
-              <span>Sheet rows</span>
-              <strong id="row-count">-</strong>
-            </article>
-          </div>
-          <div class="status" id="status">Loading live spreadsheet...</div>
-          <pre class="hidden" id="payload-preview"></pre>
-        </aside>
       </div>
     </main>
 
@@ -693,18 +619,17 @@
       let state = null;
       let currentAssignment = null;
       let isSpinning = false;
-      // Teams committed this session, excluded from the pool immediately so a
-      // slow/failed live re-read can't let the same team be drawn twice.
+      let isSaving = false;
+      // Teams + people committed this session, excluded from the pool the moment
+      // a draw is revealed so a slow/failed live re-read can never let the same
+      // team — or the same person — be drawn twice.
       const assignedHistory = new Set();
+      const assignedPeople = new Set();
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       const groupSelect = document.getElementById("group-select");
-      const paidOnly = document.getElementById("paid-only");
       const drawButton = document.getElementById("draw-button");
-      const sendButton = document.getElementById("send-button");
-      const copyButton = document.getElementById("copy-button");
-      const payloadPreview = document.getElementById("payload-preview");
-      const payloadToggle = document.getElementById("payload-toggle");
+      const retryButton = document.getElementById("retry-button");
       const statusBox = document.getElementById("status");
       const drawStage = document.getElementById("draw-stage");
       const ticketName = document.getElementById("ticket-name");
@@ -929,7 +854,7 @@
           .filter(Boolean).length;
         const people = entries.filter((entry) => {
           if (entry.team) return false;
-          if (paidOnly.checked && !entry.paid) return false;
+          if (assignedPeople.has(`${groupKey}:${entry.rowNumber}`)) return false;
           return true;
         });
         const teams = state ? state.teams.filter((team) => !assignedTeams.has(normaliseTeamName(team.country))) : [];
@@ -960,13 +885,22 @@
         }
       }
 
+      // Shrink a ticket value's font until it fits its card — so long names
+      // ("Bosnia & Herzegovina", "Trinidad and Tobago") never clip on screen.
+      function fitValue(el) {
+        el.style.fontSize = "";
+        let size = parseFloat(getComputedStyle(el).fontSize);
+        let guard = 60;
+        while ((el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) && size > 22 && guard-- > 0) {
+          size -= 3;
+          el.style.fontSize = `${size}px`;
+        }
+      }
+
       function renderCounts() {
         const pools = getDrawPools();
-        document.getElementById("names-left").textContent = pools.people.length;
-        document.getElementById("teams-left").textContent = pools.teams.length;
-        document.getElementById("assigned-count").textContent = pools.assignedCount;
-        document.getElementById("row-count").textContent = pools.entries.length;
-        drawButton.disabled = isSpinning || !state || pools.people.length === 0 || pools.teams.length === 0;
+        const exhausted = state && (pools.people.length === 0 || pools.teams.length === 0);
+        drawButton.disabled = isSpinning || isSaving || !state || exhausted;
       }
 
       function setStatus(message, tone) {
@@ -976,15 +910,12 @@
 
       function renderAssignment(assignment) {
         nameValue.textContent = assignment.person.name;
-        personMeta.textContent = `${assignment.groupTitle}, row ${assignment.person.rowNumber} - ${assignment.person.paid ? "paid" : "not paid"}`;
+        personMeta.textContent = assignment.groupTitle;
         teamValue.textContent = assignment.team.country;
         teamMeta.textContent = assignment.team.confederation || "World Cup team";
         setFlag(assignment.team);
-
-        sendButton.disabled = false;
-        copyButton.disabled = false;
-        payloadPreview.textContent = JSON.stringify(assignment, null, 2);
-        payloadToggle.classList.remove("hidden");
+        fitValue(nameValue);
+        fitValue(teamValue);
       }
 
       // ----- Animated reveal -------------------------------------------------
@@ -1019,16 +950,16 @@
       function spinReels(pools, assignment) {
         if (reducedMotion) {
           renderAssignment(assignment);
-          setStatus("Draw ready.", "good");
           celebrate();
+          commitAssignment();
           return;
         }
 
         isSpinning = true;
         drawButton.disabled = true;
-        sendButton.disabled = true;
-        copyButton.disabled = true;
         drawStage.classList.add("is-spinning");
+        nameValue.style.fontSize = "";
+        teamValue.style.fontSize = "";
         personMeta.textContent = "Drawing...";
         teamMeta.textContent = "Drawing...";
 
@@ -1040,7 +971,8 @@
           nameValue.textContent = person.name;
         }, () => {
           nameValue.textContent = assignment.person.name;
-          personMeta.textContent = `${assignment.groupTitle}, row ${assignment.person.rowNumber} - ${assignment.person.paid ? "paid" : "not paid"}`;
+          personMeta.textContent = assignment.groupTitle;
+          fitValue(nameValue);
           lockTicket(ticketName);
         });
 
@@ -1052,17 +984,13 @@
           teamValue.textContent = assignment.team.country;
           teamMeta.textContent = assignment.team.confederation || "World Cup team";
           setFlag(assignment.team);
+          fitValue(teamValue);
           lockTicket(ticketTeam);
 
-          // Finalise: enable send/copy, expose payload, celebrate.
-          sendButton.disabled = false;
-          copyButton.disabled = false;
-          payloadPreview.textContent = JSON.stringify(assignment, null, 2);
-          payloadToggle.classList.remove("hidden");
+          // The reveal is final — save it to the board automatically.
           isSpinning = false;
-          renderCounts();
-          setStatus("Draw ready.", "good");
           celebrate();
+          commitAssignment();
         });
       }
 
@@ -1133,13 +1061,15 @@
       // ----- Draw + actions --------------------------------------------------
 
       function drawAssignment() {
-        if (!state || isSpinning) return;
+        if (!state || isSpinning || isSaving) return;
 
         const pools = getDrawPools();
         if (pools.people.length === 0 || pools.teams.length === 0) {
-          setStatus("No eligible draw left for this group.", "warn");
+          setStatus("Every team in this group has been drawn.", "warn");
           return;
         }
+
+        retryButton.classList.add("hidden");
 
         const person = randomItem(pools.people);
         const team = randomItem(pools.teams);
@@ -1173,49 +1103,46 @@
         spinReels(pools, currentAssignment);
       }
 
-      async function sendAssignment() {
-        if (!currentAssignment) return;
-        sendButton.disabled = true;
-        drawButton.disabled = true;
-        setStatus("Sending assignment to workflow...", "");
+      // Auto-save the revealed draw to the board. Runs the instant the reels
+      // lock — no operator action. The team + person are excluded in-session
+      // immediately, so a slow or failed write can never produce a duplicate.
+      async function commitAssignment() {
+        if (!currentAssignment || isSaving) return;
+        const assignment = currentAssignment;
+
+        assignedHistory.add(normaliseTeamName(assignment.team.country));
+        assignedPeople.add(`${assignment.groupKey}:${assignment.person.rowNumber}`);
+
+        isSaving = true;
+        retryButton.classList.add("hidden");
+        renderCounts();
+        setStatus("Saving to the board...", "");
 
         try {
           const response = await fetch("/api/assign", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(currentAssignment)
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(assignment)
           });
           const result = await response.json().catch(() => ({}));
 
           if (!response.ok) {
-            setStatus(result.message || "Workflow did not accept the assignment.", response.status === 501 ? "warn" : "bad");
-            return;
+            throw new Error(result.message || `Save failed (${response.status}).`);
           }
 
-          // Commit locally before the (eventually-consistent) live re-read so
-          // this team is excluded from the pool even if the refresh lags/fails.
-          assignedHistory.add(normaliseTeamName(currentAssignment.team.country));
           currentAssignment = null;
-          renderCounts();
-
-          setStatus("Assignment sent to workflow.", "good");
-          await loadSpreadsheet("live");
+          setStatus(`Saved — ${assignment.person.name} drew ${assignment.team.country}.`, "good");
+          // Keep state aligned with the sheet for later draws, but don't let the
+          // refresh's own status text replace the audience-facing "Saved" line.
+          loadSpreadsheet("live", { quiet: true }).catch(() => {});
         } catch (error) {
           console.warn(error);
-          setStatus("Could not reach the assignment endpoint.", "bad");
+          setStatus("Couldn't save to the board — tap Retry.", "warn");
+          retryButton.classList.remove("hidden");
         } finally {
-          sendButton.disabled = false;
+          isSaving = false;
           renderCounts();
         }
-      }
-
-      async function copyPayload() {
-        if (!currentAssignment) return;
-        const text = JSON.stringify(currentAssignment, null, 2);
-        await navigator.clipboard.writeText(text);
-        setStatus("Payload copied.", "good");
       }
 
       async function loadFromPublishedCsv() {
@@ -1230,7 +1157,9 @@
         return buildState(Object.fromEntries(sheets));
       }
 
-      async function loadSpreadsheet(sourceLabel) {
+      async function loadSpreadsheet(sourceLabel, opts) {
+        const quiet = opts && opts.quiet;
+        const status = (message, tone) => { if (!quiet) setStatus(message, tone); };
         // Preferred: live, uncached data via n8n. Needs the local server
         // (the /api/sheet-live proxy), so skip it when opened as a file://.
         if (window.location.protocol !== "file:") {
@@ -1239,7 +1168,7 @@
             if (!response.ok) throw new Error(`live read returned ${response.status}`);
             state = buildStateFromJson(await response.json());
             renderCounts();
-            setStatus(sourceLabel === "live" ? "Refreshed live from n8n." : "Reading live from n8n.", "good");
+            status(sourceLabel === "live" ? "Refreshed live from n8n." : "Reading live from n8n.", "good");
             return;
           } catch (error) {
             console.warn("Live n8n read failed; falling back to published CSV.", error);
@@ -1250,41 +1179,30 @@
         try {
           state = await loadFromPublishedCsv();
           renderCounts();
-          setStatus("Live read unavailable — using the published spreadsheet (may lag).", "warn");
+          status("Live read unavailable — using the published spreadsheet (may lag).", "warn");
         } catch (error) {
           console.warn(error);
           state = buildState(fallbackData);
           renderCounts();
-          setStatus("Showing the saved copy because no live source could be reached.", "warn");
+          status("Showing the saved copy because no live source could be reached.", "warn");
         }
       }
 
       groupSelect.addEventListener("change", () => {
-        if (isSpinning) return;
+        if (isSpinning || isSaving) return;
         currentAssignment = null;
-        sendButton.disabled = true;
-        copyButton.disabled = true;
-        payloadPreview.classList.add("hidden");
-        payloadToggle.classList.add("hidden");
-        payloadToggle.textContent = "Show payload";
+        retryButton.classList.add("hidden");
         nameValue.textContent = "Ready";
         teamValue.textContent = "Ready";
         personMeta.textContent = "Choose a group and draw";
         teamMeta.textContent = "Choose a group and draw";
         flagEl.classList.add("hidden");
         flagPlaceholder.classList.remove("hidden");
+        setStatus("Ready to draw.", "");
         renderCounts();
       });
-      paidOnly.addEventListener("change", () => {
-        if (!isSpinning) renderCounts();
-      });
       drawButton.addEventListener("click", drawAssignment);
-      sendButton.addEventListener("click", sendAssignment);
-      copyButton.addEventListener("click", copyPayload);
-      payloadToggle.addEventListener("click", () => {
-        const hidden = payloadPreview.classList.toggle("hidden");
-        payloadToggle.textContent = hidden ? "Show payload" : "Hide payload";
-      });
+      retryButton.addEventListener("click", commitAssignment);
 
       loadSpreadsheet();
     </script>
