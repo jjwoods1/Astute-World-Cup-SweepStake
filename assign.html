@@ -693,6 +693,9 @@
       let state = null;
       let currentAssignment = null;
       let isSpinning = false;
+      // Teams committed this session, excluded from the pool immediately so a
+      // slow/failed live re-read can't let the same team be drawn twice.
+      const assignedHistory = new Set();
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       const groupSelect = document.getElementById("group-select");
@@ -914,9 +917,16 @@
       function getDrawPools() {
         const groupKey = groupSelect.value;
         const entries = state ? state.groups[groupKey] : [];
-        const assignedTeams = new Set(entries
+        // Exclude teams assigned in EITHER group, plus any committed this
+        // session, so no team can ever be drawn twice across the sweepstake.
+        const allEntries = state ? [...state.groups.group1, ...state.groups.group2] : [];
+        const assignedTeams = new Set([
+          ...allEntries.map((entry) => normaliseTeamName(entry.team)).filter(Boolean),
+          ...assignedHistory
+        ]);
+        const groupAssignedCount = entries
           .map((entry) => normaliseTeamName(entry.team))
-          .filter(Boolean));
+          .filter(Boolean).length;
         const people = entries.filter((entry) => {
           if (entry.team) return false;
           if (paidOnly.checked && !entry.paid) return false;
@@ -929,7 +939,7 @@
           entries,
           people,
           teams,
-          assignedCount: assignedTeams.size
+          assignedCount: groupAssignedCount
         };
       }
 
@@ -1166,6 +1176,7 @@
       async function sendAssignment() {
         if (!currentAssignment) return;
         sendButton.disabled = true;
+        drawButton.disabled = true;
         setStatus("Sending assignment to workflow...", "");
 
         try {
@@ -1183,6 +1194,12 @@
             return;
           }
 
+          // Commit locally before the (eventually-consistent) live re-read so
+          // this team is excluded from the pool even if the refresh lags/fails.
+          assignedHistory.add(normaliseTeamName(currentAssignment.team.country));
+          currentAssignment = null;
+          renderCounts();
+
           setStatus("Assignment sent to workflow.", "good");
           await loadSpreadsheet("live");
         } catch (error) {
@@ -1190,6 +1207,7 @@
           setStatus("Could not reach the assignment endpoint.", "bad");
         } finally {
           sendButton.disabled = false;
+          renderCounts();
         }
       }
 
