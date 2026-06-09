@@ -67,7 +67,7 @@
       }
 
       .page {
-        width: min(1120px, calc(100% - 32px));
+        width: min(2200px, calc(100% - 48px));
         margin: 0 auto;
         padding: 34px 0 42px;
       }
@@ -290,17 +290,24 @@
       }
 
       .ticket-value {
-        min-height: clamp(96px, 12vh, 150px);
+        min-height: clamp(72px, 9vh, 120px);
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 100%;
         margin: 0;
+        text-align: center;
         font-weight: 700;
         font-size: clamp(3rem, 5.5vw, 5.4rem);
         line-height: 1.04;
         color: var(--ink);
-        overflow-wrap: anywhere;
-        width: 100%;
+        overflow-wrap: normal;
+      }
+
+      .ticket-value span {
+        display: inline-block;
+        max-width: 100%;
+        overflow-wrap: normal;
       }
 
       .ticket-meta {
@@ -562,7 +569,7 @@
           <div class="draw-stage" id="draw-stage">
             <article class="ticket" id="ticket-name">
               <p class="ticket-title">Name</p>
-              <p class="ticket-value" id="draw-name">Ready</p>
+              <p class="ticket-value"><span id="draw-name">Ready</span></p>
               <p class="ticket-meta" id="draw-person-meta">Choose a group and draw</p>
             </article>
 
@@ -576,7 +583,7 @@
                 <img class="flag hidden" id="draw-flag" alt="">
                 <div class="flag-placeholder" id="flag-placeholder">?</div>
               </div>
-              <p class="ticket-value" id="draw-team">Ready</p>
+              <p class="ticket-value"><span id="draw-team">Ready</span></p>
               <p class="ticket-meta" id="draw-team-meta">Choose a group and draw</p>
             </article>
           </div>
@@ -889,10 +896,11 @@
       // ("Bosnia & Herzegovina", "Trinidad and Tobago") never clip on screen.
       function fitValue(el) {
         el.style.fontSize = "";
+        const limit = el.parentElement.clientWidth;
         let size = parseFloat(getComputedStyle(el).fontSize);
-        let guard = 60;
-        while ((el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) && size > 22 && guard-- > 0) {
-          size -= 3;
+        let guard = 80;
+        while (el.scrollWidth > limit + 1 && size > 20 && guard-- > 0) {
+          size -= 2;
           el.style.fontSize = `${size}px`;
         }
       }
