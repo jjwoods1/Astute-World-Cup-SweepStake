@@ -743,14 +743,14 @@ UEFA,France,FRA,FR,FALSE`
         const headers = rows[0] || [];
         const indexes = new Map(headers.map((header, index) => [normaliseHeader(header), index]));
         const entries = rows.slice(1).filter((row) => {
-          return cell(row, indexes, "First Name") || cell(row, indexes, "Last initial") || cell(row, indexes, "Team");
+          return cell(row, indexes, "First Name") || cell(row, indexes, "Last Name") || cell(row, indexes, "Last initial") || cell(row, indexes, "Team");
         }).map((row) => {
           const team = cell(row, indexes, "Team");
           const metadata = teamMetadata.get(normaliseTeamName(team)) || {};
 
           return {
             firstName: cell(row, indexes, "First Name"),
-            lastInitial: cell(row, indexes, "Last initial"),
+            lastName: cell(row, indexes, "Last Name") || cell(row, indexes, "Last initial"),
             team,
             paid: truthy(cell(row, indexes, "Paid?")),
             fifaCode: metadata.fifaCode || "",
@@ -806,7 +806,7 @@ UEFA,France,FRA,FR,FALSE`
         }
 
         tbody.innerHTML = group.entries.map((entry) => {
-          const displayName = [entry.firstName, entry.lastInitial].filter(Boolean).join(" ");
+          const displayName = [entry.firstName, entry.lastName].filter(Boolean).join(" ");
           const flagSrc = flagImages[entry.fifaCode] || flagImages[entry.isoCode] || `https://flagcdn.com/w80/${entry.isoCode.toLowerCase()}.png`;
           const flag = entry.fifaCode || entry.isoCode
             ? `<img class="flag" src="${flagSrc}" alt="" loading="lazy" onerror="this.style.display='none'">`

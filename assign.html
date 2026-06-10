@@ -722,8 +722,8 @@
 
         return rows.slice(1).map((row, index) => {
           const firstName = cell(row, indexes, "First Name");
-          const lastInitial = cell(row, indexes, "Last initial");
-          const name = [firstName, lastInitial].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+          const lastName = cell(row, indexes, "Last Name") || cell(row, indexes, "Last initial");
+          const name = [firstName, lastName].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
           if (!name) return null;
 
           return {
@@ -732,7 +732,7 @@
             sheetGid: tab.gid,
             rowNumber: index + 2,
             firstName,
-            lastInitial,
+            lastName,
             name,
             team: cell(row, indexes, "Team"),
             paid: truthy(cell(row, indexes, "Paid?"))
@@ -786,8 +786,8 @@
       function mapGroupJson(rows, tab) {
         return (rows || []).map((row) => {
           const firstName = String(row["First Name"] || "").trim();
-          const lastInitial = String(row["Last initial"] || "").trim();
-          const name = [firstName, lastInitial].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+          const lastName = String(row["Last Name"] || row["Last initial"] || "").trim();
+          const name = [firstName, lastName].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
           if (!name) return null;
 
           return {
@@ -796,7 +796,7 @@
             sheetGid: tab.gid,
             rowNumber: Number(row.row_number),
             firstName,
-            lastInitial,
+            lastName,
             name,
             team: String(row["Team"] || "").trim(),
             paid: truthy(row["Paid?"])
@@ -1090,7 +1090,7 @@
           person: {
             rowNumber: person.rowNumber,
             firstName: person.firstName,
-            lastInitial: person.lastInitial,
+            lastName: person.lastName,
             name: person.name,
             paid: person.paid
           },
