@@ -591,6 +591,7 @@
           <div class="statusbar">
             <div class="status" id="status">Loading live spreadsheet...</div>
             <button class="button secondary retry-button hidden" id="retry-button" type="button">Retry save</button>
+            <button class="button secondary hidden" id="csv-button" type="button">Download draw CSV</button>
           </div>
         </section>
       </div>
@@ -626,67 +627,24 @@
       let state = null;
       let isSpinning = false;
       let isSaving = false;
-      // Teams + people committed, excluded from the pool the moment a draw is
-      // revealed so a slow/failed live re-read can never let the same team —
-      // or the same person — be drawn twice. Persisted to localStorage along
-      // with the unsaved-draw queue so a reload can never lose a draw or
-      // resurface a drawn person.
-      const STORAGE_KEY = "wc-draw-state-v1";
+      // Session store: every team + person drawn this session is excluded from
+      // the pool the moment the draw is revealed, so the same team or person
+      // can never be drawn twice — even while saves are still in flight or
+      // failing. The session resets on refresh, at which point assignments are
+      // re-pulled from the sheet.
       const assignedHistory = new Set();
       const assignedPeople = new Set();
+      // Every draw made this session, in order — the source for the CSV backup.
+      const sessionDraws = [];
+      // Draws not yet confirmed in the sheet; retried in the background without
+      // ever blocking the next draw.
       let pendingSaves = [];
-
-      function loadLocalState() {
-        try {
-          const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-          (raw.assignedHistory || []).forEach((team) => assignedHistory.add(team));
-          (raw.assignedPeople || []).forEach((person) => assignedPeople.add(person));
-          pendingSaves = Array.isArray(raw.pendingSaves) ? raw.pendingSaves : [];
-        } catch (error) {
-          console.warn("Couldn't restore the saved draw state.", error);
-        }
-      }
-
-      function saveLocalState() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({
-            assignedHistory: [...assignedHistory],
-            assignedPeople: [...assignedPeople],
-            pendingSaves
-          }));
-        } catch (error) {
-          console.warn("Couldn't persist the draw state.", error);
-        }
-      }
-
-      // Once the sheet itself shows an assignment, the local exclusion entry is
-      // redundant — drop it so storage never goes stale. Entries backing a
-      // still-unsaved draw are kept.
-      function pruneLocalState() {
-        if (!state) return;
-        const pendingPeople = new Set(pendingSaves.map((a) => `${a.groupKey}:${a.person.rowNumber}`));
-        const pendingTeams = new Set(pendingSaves.map((a) => normaliseTeamName(a.team.country)));
-        const allEntries = [...(state.groups.group1 || []), ...(state.groups.group2 || [])];
-
-        for (const key of [...assignedPeople]) {
-          if (pendingPeople.has(key)) continue;
-          const separator = key.indexOf(":");
-          const groupKey = key.slice(0, separator);
-          const rowNumber = key.slice(separator + 1);
-          const entry = (state.groups[groupKey] || []).find((e) => String(e.rowNumber) === rowNumber);
-          if (entry && entry.team) assignedPeople.delete(key);
-        }
-        for (const team of [...assignedHistory]) {
-          if (pendingTeams.has(team)) continue;
-          if (allEntries.some((entry) => normaliseTeamName(entry.team) === team)) assignedHistory.delete(team);
-        }
-        saveLocalState();
-      }
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       const groupSelect = document.getElementById("group-select");
       const drawButton = document.getElementById("draw-button");
       const retryButton = document.getElementById("retry-button");
+      const csvButton = document.getElementById("csv-button");
       const statusBox = document.getElementById("status");
       const drawStage = document.getElementById("draw-stage");
       const ticketName = document.getElementById("ticket-name");
@@ -958,7 +916,7 @@
       function renderCounts() {
         const pools = getDrawPools();
         const exhausted = state && (pools.people.length === 0 || pools.teams.length === 0);
-        drawButton.disabled = isSpinning || isSaving || pendingSaves.length > 0 || !state || exhausted;
+        drawButton.disabled = isSpinning || !state || exhausted;
       }
 
       function setStatus(message, tone) {
@@ -1119,9 +1077,9 @@
       // ----- Draw + actions --------------------------------------------------
 
       function drawAssignment() {
-        // Never draw while a previous result is still unsaved — a new draw
-        // must not be able to orphan one that hasn't reached the sheet yet.
-        if (!state || isSpinning || isSaving || pendingSaves.length) return;
+        // Every draw is logged in the session store + CSV the moment it's
+        // revealed, so it's safe to keep drawing while saves catch up.
+        if (!state || isSpinning) return;
 
         const pools = getDrawPools();
         if (pools.people.length === 0 || pools.teams.length === 0) {
@@ -1167,14 +1125,22 @@
         return new Promise((resolve) => setTimeout(resolve, ms));
       }
 
-      // The reveal is final: exclude the person + team immediately, persist the
-      // draw to the unsaved queue (survives reloads), then save it.
+      // The reveal is final: exclude the person + team immediately, log the
+      // draw for the CSV backup, then save in the background. Drawing carries
+      // on regardless of how the save goes.
       function queueAssignment(assignment) {
         assignedHistory.add(normaliseTeamName(assignment.team.country));
         assignedPeople.add(`${assignment.groupKey}:${assignment.person.rowNumber}`);
+        sessionDraws.push(assignment);
+        csvButton.classList.remove("hidden");
         pendingSaves.push(assignment);
-        saveLocalState();
         processPendingSaves();
+      }
+
+      // Keep the audience-facing reveal text ("Drawing...") on screen — save
+      // chatter only shows between spins.
+      function saveStatus(message, tone) {
+        if (!isSpinning) setStatus(message, tone);
       }
 
       async function postAssignment(assignment) {
@@ -1214,18 +1180,21 @@
         return Boolean(entry && normaliseTeamName(entry.team) === normaliseTeamName(assignment.team.country));
       }
 
-      // Drain the unsaved-draw queue in order. Each draw gets a timeout,
-      // automatic retries with backoff, and a read-back verification before it
-      // is declared saved. Drawing stays blocked until the queue is empty.
+      // Drain the unsaved-draw queue in the background, in order. Each draw
+      // gets a timeout, automatic retries with backoff, and a read-back
+      // verification before it is declared saved. Drawing is never blocked —
+      // if the board can't be reached the queue keeps retrying every 20s and
+      // the CSV backup always has the full record.
+      let retryTimer = null;
       async function processPendingSaves() {
         if (isSaving || !pendingSaves.length) return;
+        if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
         isSaving = true;
         retryButton.classList.add("hidden");
-        renderCounts();
 
         while (pendingSaves.length) {
           const assignment = pendingSaves[0];
-          setStatus(`Saving ${assignment.person.name} → ${assignment.team.country}...`, "");
+          saveStatus(`Saving ${assignment.person.name} → ${assignment.team.country}...`, "");
 
           let saved = false;
           for (let attempt = 1; attempt <= 3 && !saved; attempt += 1) {
@@ -1240,18 +1209,43 @@
           }
           if (!saved) break;
 
+          assignment.savedToSheet = true;
           pendingSaves.shift();
-          saveLocalState();
-          pruneLocalState();
-          setStatus(`Saved — ${assignment.person.name} drew ${assignment.team.country}.`, "good");
+          saveStatus(`Saved — ${assignment.person.name} drew ${assignment.team.country}.`, "good");
         }
 
         isSaving = false;
         if (pendingSaves.length) {
-          setStatus("Couldn't save to the board — tap Retry. Drawing is paused until this saves.", "warn");
+          saveStatus(`${pendingSaves.length} draw${pendingSaves.length === 1 ? "" : "s"} not saved to the board yet — retrying in the background. Download the CSV as a backup.`, "warn");
           retryButton.classList.remove("hidden");
+          retryTimer = setTimeout(processPendingSaves, 20000);
         }
         renderCounts();
+      }
+
+      // CSV backup of every draw made this session — works even with no
+      // network or n8n at all.
+      function downloadSessionCsv() {
+        const escapeCsv = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+        const lines = [["Drawn At", "Group", "First Name", "Last Name", "Team", "Saved To Sheet"].join(",")];
+        sessionDraws.forEach((draw) => {
+          lines.push([
+            escapeCsv(draw.assignedAt),
+            escapeCsv(draw.groupTitle),
+            escapeCsv(draw.person.firstName),
+            escapeCsv(draw.person.lastName),
+            escapeCsv(draw.team.country),
+            escapeCsv(draw.savedToSheet ? "yes" : "no")
+          ].join(","));
+        });
+        const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `world-cup-draws-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(link.href);
       }
 
       async function loadFromPublishedCsv() {
@@ -1298,7 +1292,7 @@
       }
 
       groupSelect.addEventListener("change", () => {
-        if (isSpinning || isSaving || pendingSaves.length) return;
+        if (isSpinning) return;
         nameValue.textContent = "Ready";
         teamValue.textContent = "Ready";
         personMeta.textContent = "Choose a group and draw";
@@ -1310,14 +1304,17 @@
       });
       drawButton.addEventListener("click", drawAssignment);
       retryButton.addEventListener("click", processPendingSaves);
+      csvButton.addEventListener("click", downloadSessionCsv);
 
-      loadLocalState();
-      loadSpreadsheet().then(() => {
-        pruneLocalState();
-        // A reload mid-save must never lose a draw — resume saving anything
-        // still queued from a previous session.
-        processPendingSaves();
+      // Last line of defence: warn before leaving with draws that haven't
+      // reached the sheet yet.
+      window.addEventListener("beforeunload", (event) => {
+        if (!pendingSaves.length) return;
+        event.preventDefault();
+        event.returnValue = "Some draws haven't saved to the board yet — download the CSV before leaving.";
       });
+
+      loadSpreadsheet();
     </script>
   </body>
 </html>
