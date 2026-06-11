@@ -517,12 +517,11 @@
                 <tr>
                   <th>Name</th>
                   <th>Team</th>
-                  <th>Paid?</th>
                 </tr>
               </thead>
               <tbody id="entries-group-1">
                 <tr>
-                  <td class="empty" colspan="3">Loading entries...</td>
+                  <td class="empty" colspan="2">Loading entries...</td>
                 </tr>
               </tbody>
             </table>
@@ -542,12 +541,11 @@
                 <tr>
                   <th>Name</th>
                   <th>Team</th>
-                  <th>Paid?</th>
                 </tr>
               </thead>
               <tbody id="entries-group-2">
                 <tr>
-                  <td class="empty" colspan="3">Loading entries...</td>
+                  <td class="empty" colspan="2">Loading entries...</td>
                 </tr>
               </tbody>
             </table>
@@ -775,7 +773,7 @@ UEFA,France,FRA,FR,FALSE`
       function renderGroup(group) {
         const tbody = document.getElementById(group.entriesId);
         if (group.entries.length === 0) {
-          tbody.innerHTML = `<tr><td class="empty" colspan="3">No entries found in the spreadsheet.</td></tr>`;
+          tbody.innerHTML = `<tr><td class="empty" colspan="2">No entries found in the spreadsheet.</td></tr>`;
           return;
         }
 
@@ -797,7 +795,6 @@ UEFA,France,FRA,FR,FALSE`
                   </span>
                 </div>
               </td>
-              <td data-label="Paid?"><span class="pill ${entry.paid ? "yes" : "no"}">${entry.paid ? "Paid" : "Not paid"}</span></td>
             </tr>
           `;
         }).join("");
