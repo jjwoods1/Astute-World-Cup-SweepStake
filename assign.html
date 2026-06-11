@@ -1134,6 +1134,9 @@
         sessionDraws.push(assignment);
         csvButton.classList.remove("hidden");
         pendingSaves.push(assignment);
+        // Re-enable Draw straight away — the save continues in the background
+        // and the session store already guarantees no duplicates.
+        renderCounts();
         processPendingSaves();
       }
 
