@@ -51,6 +51,9 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [260, 300],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
       "credentials": {
         "googleSheetsOAuth2Api": { "id": "fbjo8wjmhy3kj1DR", "name": "Google Sheets account" }
       }
