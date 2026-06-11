@@ -857,12 +857,14 @@
       function getDrawPools() {
         const groupKey = groupSelect.value;
         const entries = state ? state.groups[groupKey] : [];
-        // Exclude teams assigned in EITHER group, plus any committed this
-        // session, so no team can ever be drawn twice across the sweepstake.
-        const allEntries = state ? [...state.groups.group1, ...state.groups.group2] : [];
+        // Teams are excluded per group — each group is a fresh table with its
+        // own full pool, so the same team can be drawn once in EACH group but
+        // never twice within one.
         const assignedTeams = new Set([
-          ...allEntries.map((entry) => normaliseTeamName(entry.team)).filter(Boolean),
-          ...assignedHistory
+          ...entries.map((entry) => normaliseTeamName(entry.team)).filter(Boolean),
+          ...[...assignedHistory]
+            .filter((key) => key.startsWith(`${groupKey}:`))
+            .map((key) => key.slice(groupKey.length + 1))
         ]);
         const groupAssignedCount = entries
           .map((entry) => normaliseTeamName(entry.team))
@@ -1129,7 +1131,7 @@
       // draw for the CSV backup, then save in the background. Drawing carries
       // on regardless of how the save goes.
       function queueAssignment(assignment) {
-        assignedHistory.add(normaliseTeamName(assignment.team.country));
+        assignedHistory.add(`${assignment.groupKey}:${normaliseTeamName(assignment.team.country)}`);
         assignedPeople.add(`${assignment.groupKey}:${assignment.person.rowNumber}`);
         sessionDraws.push(assignment);
         csvButton.classList.remove("hidden");
